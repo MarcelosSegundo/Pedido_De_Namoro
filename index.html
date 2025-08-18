@@ -9,6 +9,7 @@
     body {
       margin: 0;
       height: 100vh;
+      width: 100vw;
       background-color: #f0f0f0;
       font-family: Arial, sans-serif;
       overflow: hidden;
@@ -38,11 +39,6 @@
       margin-bottom: 20px;
     }
 
-    #nao {
-      position: absolute;
-      /* mudou de relative para absolute */
-    }
-
     button {
       width: 100px;
       height: 40px;
@@ -50,6 +46,10 @@
       cursor: pointer;
       position: relative;
       /* agora os botões não são mais absolutos */
+    }
+
+    button#nao {
+      border: 2px dashed red;
     }
 
     /* Estilo do modal */
@@ -103,8 +103,6 @@
       /* <- Aplica a animação no coração */
     }
 
-
-
     .modal-conteudo button {
       position: relative;
       width: auto;
@@ -142,57 +140,81 @@
   </div>
 
   <script>
-    const botaoSim = document.getElementById("sim");
+    let tamanhoSim = 1; // fator inicial de escala
     const botaoNao = document.getElementById("nao");
+    const botaoSim = document.getElementById("sim");
     const modal = document.getElementById("meuModal");
 
-    let tamanhoSim = 1; // Fator inicial de escala do botão "Sim"
-
-    // Abre o modal ao clicar em "Sim"
     botaoSim.onclick = () => {
-      modal.style.display = "flex";
+      modal.style.display = "flex"; // Exibe o modal
     };
 
-    // Fecha o modal
-    function fecharModal() {
-      modal.style.display = "none";
-    }
-
-    // Faz o botão "Não" se mover quando clicado
     botaoNao.onclick = () => {
-      const larguraJanela = window.innerWidth;
-      const alturaJanela = window.innerHeight;
-      const larguraBotao = botaoNao.offsetWidth;
-      const alturaBotao = botaoNao.offsetHeight;
+      const botaoWidth = botaoNao.offsetWidth;
+      const botaoHeight = botaoNao.offsetHeight;
 
+      // Tamanho da tela visível
+      const larguraTela = document.documentElement.clientWidth; // ~720px
+      const alturaTela = document.documentElement.clientHeight; // ~1600px
+
+      const h1Rect = document.querySelector("h1").getBoundingClientRect();
       const simRect = botaoSim.getBoundingClientRect();
-      let novaPosicaoX, novaPosicaoY;
+
+      // Margens de segurança
+      const margemEsquerda = 10;
+      const margemDireita = larguraTela - botaoWidth - 10;
+      const margemTopo = h1Rect.bottom + 10;
+      const margemBase = alturaTela - botaoHeight - 10;
+
+      let randomX, randomY;
+      let colideComTexto, colideComSim;
 
       do {
-        // X aleatório dentro da tela
-        novaPosicaoX = Math.random() * (larguraJanela - larguraBotao);
-        // Y aleatório dentro da tela
-        novaPosicaoY = Math.random() * (alturaJanela - alturaBotao);
+        randomX = Math.max(
+          margemEsquerda,
+          Math.min(
+            Math.floor(Math.random() * larguraTela),
+            larguraTela - botaoWidth - 10
+          )
+        );
 
-        // Verifica colisão com o botão "Sim"
-        var colideComSim =
-          novaPosicaoX < simRect.right &&
-          novaPosicaoX + larguraBotao > simRect.left &&
-          novaPosicaoY < simRect.bottom &&
-          novaPosicaoY + alturaBotao > simRect.top;
+        randomY = Math.max(
+          margemTopo,
+          Math.min(
+            Math.floor(Math.random() * alturaTela),
+            alturaTela - botaoHeight - 10
+          )
+        );
 
-      } while (colideComSim);
+        // Verifica colisão com o texto h1
+        colideComTexto =
+          randomX < h1Rect.right &&
+          randomX + botaoWidth > h1Rect.left &&
+          randomY < h1Rect.bottom &&
+          randomY + botaoHeight > h1Rect.top;
 
-      // Define a nova posição do botão "Não"
-      botaoNao.style.left = `${Math.max(0, novaPosicaoX)}px`;
-      botaoNao.style.top = `${Math.max(0, novaPosicaoY)}px`;
+        // Verifica colisão com botão SIM
+        colideComSim =
+          randomX < simRect.right &&
+          randomX + botaoWidth > simRect.left &&
+          randomY < simRect.bottom &&
+          randomY + botaoHeight > simRect.top;
 
-      // Aumenta o botão "Sim" a cada clique no "Não"
+      } while (colideComTexto || colideComSim);
+
+      botaoNao.style.position = "absolute";
+      botaoNao.style.left = `${randomX}px`;
+      botaoNao.style.top = `${randomY}px`;
+
+      // Aumenta o tamanho do botão Sim
       tamanhoSim += 0.2;
       botaoSim.style.transform = `scale(${tamanhoSim})`;
     };
-  </script>
 
+    function fecharModal() {
+      modal.style.display = "none";
+    }
+  </script>
 
 </body>
 
