@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,11 +17,20 @@
 
     .container {
       position: absolute;
-      top: 20%;
+      top: 30%;
+      /* coloca mais centralizado na tela */
       left: 50%;
       transform: translateX(-50%);
       text-align: center;
-      width: 100%;
+    }
+
+    .botoes {
+      margin-top: 20px;
+      /* espaço entre o texto e os botões */
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      /* espaço entre os botões */
     }
 
     h1 {
@@ -32,25 +42,15 @@
       width: 100px;
       height: 40px;
       font-size: 16px;
-      position: absolute;
       cursor: pointer;
-    }
-
-    #sim {
-      left: 50%;
-      transform: translateX(-120%);
-      top: 60%;
-    }
-
-    #nao {
-      left: 50%;
-      transform: translateX(20%);
-      top: 60%;
+      position: relative;
+      /* agora os botões não são mais absolutos */
     }
 
     /* Estilo do modal */
     .modal {
-      display: none; /* Esconde por padrão */
+      display: none;
+      /* Esconde por padrão */
       position: fixed;
       z-index: 1000;
       left: 0;
@@ -67,13 +67,38 @@
       padding: 30px 40px;
       border-radius: 12px;
       text-align: center;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes batimento {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      25% {
+        transform: scale(1.2);
+      }
+
+      50% {
+        transform: scale(1);
+      }
+
+      75% {
+        transform: scale(1.2);
+      }
     }
 
     .modal-conteudo p {
-      font-size: 20px;
-      margin-bottom: 20px;
+      font-size: 120px;
+      margin-bottom: 100%;
+      color: red;
+      animation: batimento 1s infinite;
+      /* <- Aplica a animação no coração */
     }
+
+
 
     .modal-conteudo button {
       position: relative;
@@ -92,14 +117,16 @@
     }
   </style>
 </head>
+
 <body>
 
   <div class="container">
     <h1>Aceita namorar comigo?</h1>
+    <div class="botoes">
+      <button id="sim">Sim</button>
+      <button id="nao">Não</button>
+    </div>
   </div>
-
-  <button id="sim">Sim</button>
-  <button id="nao">Não</button>
 
   <!-- Modal -->
   <div id="meuModal" class="modal">
@@ -110,35 +137,58 @@
   </div>
 
   <script>
-    const botaoNao = document.getElementById("nao");
     const botaoSim = document.getElementById("sim");
+    const botaoNao = document.getElementById("nao");
     const modal = document.getElementById("meuModal");
 
+    let tamanhoSim = 1; // Fator inicial de escala do botão "Sim"
+
+    // Abre o modal ao clicar em "Sim"
     botaoSim.onclick = () => {
-      modal.style.display = "flex"; // Exibe o modal
+      modal.style.display = "flex";
     };
 
-    botaoNao.onclick = () => {
-      const botaoWidth = 100;
-      const botaoHeight = 40;
-
-      const maxX = window.innerWidth - botaoWidth;
-      const maxY = window.innerHeight - botaoHeight;
-
-      const safeTop = 100;
-      const safeBottom = 50;
-
-      const randomX = Math.floor(Math.random() * maxX);
-      const randomY = Math.floor(Math.random() * (maxY - safeTop - safeBottom)) + safeTop;
-
-      botaoNao.style.left = `${randomX}px`;
-      botaoNao.style.top = `${randomY}px`;
-    };
-
+    // Fecha o modal
     function fecharModal() {
       modal.style.display = "none";
     }
+
+    // Faz o botão "Não" se mover quando clicado
+    botaoNao.onclick = () => {
+      const larguraJanela = window.innerWidth;
+      const alturaJanela = window.innerHeight;
+      const larguraBotao = botaoNao.offsetWidth;
+      const alturaBotao = botaoNao.offsetHeight;
+
+      const simRect = botaoSim.getBoundingClientRect();
+      let novaPosicaoX, novaPosicaoY;
+
+      do {
+        // X aleatório dentro da tela
+        novaPosicaoX = Math.random() * (larguraJanela - larguraBotao);
+        // Y aleatório dentro da tela
+        novaPosicaoY = Math.random() * (alturaJanela - alturaBotao);
+
+        // Verifica colisão com o botão "Sim"
+        var colideComSim =
+          novaPosicaoX < simRect.right &&
+          novaPosicaoX + larguraBotao > simRect.left &&
+          novaPosicaoY < simRect.bottom &&
+          novaPosicaoY + alturaBotao > simRect.top;
+
+      } while (colideComSim);
+
+      // Define a nova posição do botão "Não"
+      botaoNao.style.left = `${Math.max(0, novaPosicaoX)}px`;
+      botaoNao.style.top = `${Math.max(0, novaPosicaoY)}px`;
+
+      // Aumenta o botão "Sim" a cada clique no "Não"
+      tamanhoSim += 0.2;
+      botaoSim.style.transform = `scale(${tamanhoSim})`;
+    };
   </script>
 
+
 </body>
+
 </html>
