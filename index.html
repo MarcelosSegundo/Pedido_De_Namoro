@@ -19,7 +19,6 @@
     .container {
       position: absolute;
       top: 30%;
-      /* coloca mais centralizado na tela */
       left: 50%;
       transform: translateX(-50%);
       text-align: center;
@@ -27,11 +26,9 @@
 
     .botoes {
       margin-top: 20px;
-      /* espaço entre o texto e os botões */
       display: flex;
       justify-content: center;
       gap: 20px;
-      /* espaço entre os botões */
     }
 
     h1 {
@@ -45,17 +42,14 @@
       font-size: 16px;
       cursor: pointer;
       position: relative;
-      /* agora os botões não são mais absolutos */
     }
 
     button#nao {
       border: 2px dashed red;
     }
 
-    /* Estilo do modal */
     .modal {
       display: none;
-      /* Esconde por padrão */
       position: fixed;
       z-index: 1000;
       left: 0;
@@ -76,31 +70,17 @@
     }
 
     @keyframes batimento {
-
-      0%,
-      100% {
-        transform: scale(1);
-      }
-
-      25% {
-        transform: scale(1.2);
-      }
-
-      50% {
-        transform: scale(1);
-      }
-
-      75% {
-        transform: scale(1.2);
-      }
+      0%, 100% { transform: scale(1); }
+      25% { transform: scale(1.2); }
+      50% { transform: scale(1); }
+      75% { transform: scale(1.2); }
     }
 
     .modal-conteudo p {
       font-size: 120px;
-      margin-bottom: 100%;
+      margin-bottom: 30px;
       color: red;
       animation: batimento 1s infinite;
-      /* <- Aplica a animação no coração */
     }
 
     .modal-conteudo button {
@@ -140,81 +120,67 @@
   </div>
 
   <script>
-    let tamanhoSim = 1; // fator inicial de escala
-    const botaoNao = document.getElementById("nao");
-    const botaoSim = document.getElementById("sim");
-    const modal = document.getElementById("meuModal");
+  let tamanhoSim = 1;
+  const botaoNao = document.getElementById("nao");
+  const botaoSim = document.getElementById("sim");
+  const modal = document.getElementById("meuModal");
 
-    botaoSim.onclick = () => {
-      modal.style.display = "flex"; // Exibe o modal
-    };
+  botaoSim.onclick = () => {
+    modal.style.display = "flex";
+  };
 
-    botaoNao.onclick = () => {
-      const botaoWidth = botaoNao.offsetWidth;
-      const botaoHeight = botaoNao.offsetHeight;
+  botaoNao.onclick = () => {
+    const botaoWidth = botaoNao.offsetWidth;
+    const botaoHeight = botaoNao.offsetHeight;
 
-      // Tamanho da tela visível
-      const larguraTela = document.documentElement.clientWidth; // ~720px
-      const alturaTela = document.documentElement.clientHeight; // ~1600px
+    const larguraTela = document.documentElement.clientWidth;
+    const alturaMaxima = 1100; // limite máximo de altura para o botão NÃO
 
-      const h1Rect = document.querySelector("h1").getBoundingClientRect();
-      const simRect = botaoSim.getBoundingClientRect();
+    const h1Rect = document.querySelector("h1").getBoundingClientRect();
+    const simRect = botaoSim.getBoundingClientRect();
 
-      // Margens de segurança
-      const margemEsquerda = 10;
-      const margemDireita = larguraTela - botaoWidth - 10;
-      const margemTopo = h1Rect.bottom + 10;
-      const margemBase = alturaTela - botaoHeight - 10;
+    const margemEsquerda = 10;
+    const margemDireita = larguraTela - botaoWidth - 10;
+    const margemTopo = h1Rect.bottom + 10;
+    const margemBase = alturaMaxima - botaoHeight - 10;
 
-      let randomX, randomY;
-      let colideComTexto, colideComSim;
+    let randomX, randomY;
+    let colideComTexto, colideComSim;
 
-      do {
-        randomX = Math.max(
-          margemEsquerda,
-          Math.min(
-            Math.floor(Math.random() * larguraTela),
-            larguraTela - botaoWidth - 10
-          )
-        );
+    do {
+      randomX = Math.floor(Math.random() * (margemDireita - margemEsquerda)) + margemEsquerda;
+      randomY = Math.floor(Math.random() * (margemBase - margemTopo)) + margemTopo;
 
-        randomY = Math.max(
-          margemTopo,
-          Math.min(
-            Math.floor(Math.random() * alturaTela),
-            alturaTela - botaoHeight - 10
-          )
-        );
+      // Verifica colisão com o texto h1
+      colideComTexto =
+        randomX < h1Rect.right &&
+        randomX + botaoWidth > h1Rect.left &&
+        randomY < h1Rect.bottom &&
+        randomY + botaoHeight > h1Rect.top;
 
-        // Verifica colisão com o texto h1
-        colideComTexto =
-          randomX < h1Rect.right &&
-          randomX + botaoWidth > h1Rect.left &&
-          randomY < h1Rect.bottom &&
-          randomY + botaoHeight > h1Rect.top;
+      // Verifica colisão com botão SIM
+      colideComSim =
+        randomX < simRect.right &&
+        randomX + botaoWidth > simRect.left &&
+        randomY < simRect.bottom &&
+        randomY + botaoHeight > simRect.top;
 
-        // Verifica colisão com botão SIM
-        colideComSim =
-          randomX < simRect.right &&
-          randomX + botaoWidth > simRect.left &&
-          randomY < simRect.bottom &&
-          randomY + botaoHeight > simRect.top;
+    } while (colideComTexto || colideComSim);
 
-      } while (colideComTexto || colideComSim);
+    botaoNao.style.position = "absolute";
+    botaoNao.style.left = `${randomX}px`;
+    botaoNao.style.top = `${randomY}px`;
 
-      botaoNao.style.position = "absolute";
-      botaoNao.style.left = `${randomX}px`;
-      botaoNao.style.top = `${randomY}px`;
+    // Aumenta o tamanho do botão Sim
+    tamanhoSim += 0.2;
+    botaoSim.style.transform = `scale(${tamanhoSim})`;
+  };
 
-      // Aumenta o tamanho do botão Sim
-      tamanhoSim += 0.2;
-      botaoSim.style.transform = `scale(${tamanhoSim})`;
-    };
+  function fecharModal() {
+    modal.style.display = "none";
+  }
+</script>
 
-    function fecharModal() {
-      modal.style.display = "none";
-    }
-  </script>
 
 </body>
 
